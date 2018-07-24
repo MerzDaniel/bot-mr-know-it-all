@@ -11,9 +11,8 @@
   "dependencies": {
     "@slack/client": "^4.3.1",
     "@slack/events-api": "^1.0.1",
-    "dom-parser": "^0.1.5",
     "dotenv": "^6.0.0",
     "jsdom": "^11.11.0",
-    "node-wikipedia": "0.0.2"
+    "request-promise": "^4.2.2"
   }
 }

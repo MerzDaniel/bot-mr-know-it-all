@@ -1,19 +1,24 @@
-const {promisify} = require('util')
+const requestPromise = require('request-promise')
 const jsdom = require('jsdom')
-const wikipedia = require('node-wikipedia')
 
-const wikiPageDataAsPromised = (pageName, opts)=> new Promise((resolve, reject) => {
-    try {
-        wikipedia.page.data(pageName, opts, resolve)
-    } catch(err) {reject(err)}
-})
+async function loadPage(pageName) {
+    // const page = await promisify(http.get)('https://en.wikipedia.org/wiki/'+pageName)
+    const uri = 'https://en.wikipedia.org/wiki/' + pageName.replace(' ','_')
+
+    const page = await requestPromise({
+        uri,
+        // transform: body => (new jsdom.JSDOM(body, {includeNodeLocations: true})), //cheerio.load
+    }, )
+
+    return new jsdom.JSDOM(page, {includeNodeLocations: true})
+    // console.log(page)
+}
 
 async function loadPageTextWiki(pageName) {
-    const page = await wikiPageDataAsPromised(pageName, {content: true})
-    const html =page.text['*']
-
-    const dom = new jsdom.JSDOM(html, {includeNodeLocations: true})
+    const dom = await loadPage(pageName)
     const doc = dom.window.document
+
+
     const h2 = doc.querySelector('h2')
     const locationH2 = dom.nodeLocation(h2)
     const c = doc.querySelectorAll('.mw-parser-output > p')
@@ -52,6 +57,7 @@ async function loadWrite() {
     })
 
 }
+
 async function loadFromWikiSendMessage(webClient, rtmClient, message) {
     const strippedMessage = message.text.split(' ').filter(t => (!t.includes(rtmClient.activeUserId))).join(' ');
     const description = await loadPageTextWiki(strippedMessage)
@@ -61,8 +67,11 @@ async function loadFromWikiSendMessage(webClient, rtmClient, message) {
     return res
 }
 
+
 const startBot = (webClient, rtmClient) => {
-    // loadWrite()
+    // new Promise((resolve, reject) => {
+    //     loadPageTextWiki('clinton').then(console.log).catch(reject)
+    // }).catch(console.error)
     // return;
 
     console.log('start bot')
