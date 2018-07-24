@@ -27,4 +27,4 @@ const ids = {
 //
 // sendRtmMessage(rtm, 'Mega Message', ids.generalChannel)
 
-startBot(rtm)
+startBot(web, rtm)
