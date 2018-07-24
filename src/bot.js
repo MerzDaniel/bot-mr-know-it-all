@@ -2,23 +2,33 @@ const requestPromise = require('request-promise')
 const jsdom = require('jsdom')
 
 async function loadPage(pageName) {
-    // const page = await promisify(http.get)('https://en.wikipedia.org/wiki/'+pageName)
     const uri = 'https://en.wikipedia.org/wiki/' + pageName.replace(' ','_')
 
     const page = await requestPromise({
         uri,
-        // transform: body => (new jsdom.JSDOM(body, {includeNodeLocations: true})), //cheerio.load
     }, )
 
     return new jsdom.JSDOM(page, {includeNodeLocations: true})
-    // console.log(page)
+}
+
+function notAMainArticle(doc) {
+    const c = doc.querySelector('.mw-parser-output > p')
+    return c.innerHTML.includes('may refer to:')
+}
+async function loadFirstLinkDom(doc) {
+    const firstLink = doc.querySelector('.mw-parser-output > ul > li > a')
+    const newPageName = firstLink.attributes[0].value.replace('/wiki/', '')
+    return await loadPage(newPageName)
 }
 
 async function loadPageTextWiki(pageName) {
-    const dom = await loadPage(pageName)
+    let dom = await loadPage(pageName)
+
+    if(notAMainArticle(dom.window.document)) {
+        dom = await loadFirstLinkDom(dom.window.document)
+    }
+
     const doc = dom.window.document
-
-
     const h2 = doc.querySelector('h2')
     const locationH2 = dom.nodeLocation(h2)
     const c = doc.querySelectorAll('.mw-parser-output > p')
@@ -36,26 +46,11 @@ async function sendMessage(client, text, channel) {
     return await client.chat.postMessage({ channel, text })
 }
 
-async function loadWrite() {
-    wikipedia.page.data('Leek', {content: true}, (content) => {
-        const html =content.text['*']
-
-        const dom = new jsdom.JSDOM(html, {includeNodeLocations: true})
-        const doc = dom.window.document
-        const h2 = doc.querySelector('h2')
-        const locationH2 = dom.nodeLocation(h2)
-        const c = doc.querySelectorAll('.mw-parser-output > p')
-
-        let resultText
-        for(let n of c ) {
-            if (dom.nodeLocation(n).startOffset > locationH2.startOffset)
-                continue
-            console.log(n.innerHTML)
-            console.log(Object.keys(n))
-
-        }
-    })
-
+async function test() {
+    const dom = await loadPage('asdf')
+    const doc = dom.window.document
+    console.log(notAMainArticle(doc))
+    console.log(await loadFirstLinkDom(doc))
 }
 
 async function loadFromWikiSendMessage(webClient, rtmClient, message) {
@@ -67,10 +62,9 @@ async function loadFromWikiSendMessage(webClient, rtmClient, message) {
     return res
 }
 
-
 const startBot = (webClient, rtmClient) => {
     // new Promise((resolve, reject) => {
-    //     loadPageTextWiki('clinton').then(console.log).catch(reject)
+    //     test().then(resolve).catch(reject)
     // }).catch(console.error)
     // return;
 
