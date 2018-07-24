@@ -11,6 +11,6 @@ const ids = {
 }
 
 // sendMessage('Hello there! ... Ah General Kenobi!', ids.personalMessageToMe)
-sendMessageToAll('Message to all').catch(console.error)
+// sendMessageToAll('Message to all').catch(console.error)
 
 // sendRtmMessage('Mega Message', ids.generalChannel)
