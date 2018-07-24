@@ -1,0 +1,15 @@
+{
+  "name": "bot-mr-know-it-all",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Daniel Merz",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/client": "^4.3.1",
+    "@slack/events-api": "^1.0.1"
+  }
+}
